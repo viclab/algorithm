@@ -30,13 +30,13 @@ void InOrderTraversal(BTree root);
 void PostOrderTraversal(BTree root);
 
 //函数：二叉树遍历-前序遍历(非递归方式)
-void PreOrderRecursion(BTree root);
+void PreOrderNonrecursive(BTree root);
 
 //函数：二叉树遍历-中序遍历(非递归方式)
-void InOrderRecursion(BTree root);
+void InOrderNonrecursive(BTree root);
 
 //函数：二叉树遍历-后序遍历(非递归方式)
-void PostOrderRecursion(BTree root);
+void PostOrderNonrecursive(BTree root);
 
 int main()
 {
@@ -57,15 +57,15 @@ int main()
     cout << endl;
 
     cout << "非递归前序：";
-    PreOrderRecursion(bt);
+    PreOrderNonrecursive(bt);
     cout << endl;
 
     cout << "非递归中序：";
-    InOrderRecursion(bt);
+    InOrderNonrecursive(bt);
     cout << endl;
 
     cout << "非递归后序：";
-    PostOrderRecursion(bt);
+    PostOrderNonrecursive(bt);
     cout << endl;
     return 0;
 }
@@ -162,7 +162,7 @@ void PostOrderTraversal(BTree root)
 }
 
 //函数：二叉树遍历-前序遍历(非递归方式)
-void PreOrderRecursion(BTree root)
+void PreOrderNonrecursive(BTree root)
 {
     assert(root != NULL);
     stack<BTreeNode *> st;
@@ -185,7 +185,7 @@ void PreOrderRecursion(BTree root)
 //  1.若其左孩子不为空，则将P入栈并将P的左孩子置为当前的P，然后对P执行同样处理
 //  2.若其左孩子为空，则取栈顶元素，并进行出栈操作，访问该栈顶节点，然后将P置为该节点的右孩子
 //  3.直到P为NULL并且栈为空则遍历结束
-void InOrderRecursion(BTree root)
+void InOrderNonrecursive(BTree root)
 {
     //assert(root != NULL);
     stack<BTreeNode *> st;
@@ -210,7 +210,7 @@ void InOrderRecursion(BTree root)
 //思路：对于这样的节点：
 //          （1）叶节点
 //          （2）左孩子或右孩子都已被访问过
-void PostOrderRecursion(BTree root)
+void PostOrderNonrecursive(BTree root)
 {
     stack<BTreeNode *> st;
     st.push(root);
