@@ -101,28 +101,53 @@ BTree InsertBTreeRecursion(BTree &root, int val)
 //向二叉排序树中插入元素-非递归
 void InsertBinaryTree(BTree *root, int val)
 {
-    BTreeNode *node = new BTreeNode;
-    node->value = val;
-    node->lchild = node->rchild = NULL;
-    if (*root == NULL)
+
+    BTreeNode *newNode = new BTreeNode();
+    newNode->value = val;
+    newNode->lchild = newNode->rchild = NULL;
+
+    BTreeNode *pre, *cur;
+    pre = NULL;
+    cur = *root;
+    while (cur != NULL)
     {
-        *root = node;
-        return;
-    }
-
-    BTreeNode *bp = *root;
-    while (bp->value > val && bp->lchild != NULL
-            || bp->value < val && bp->rchild != NULL) {
-        if (bp->value > val)
-            bp = bp->lchild;
+        pre = cur;
+        if (val < cur->value)
+            cur = cur->lchild;
         else
-            bp = bp->rchild;
+            cur = cur->rchild;
     }
 
-    if (bp->value > val) 
-        bp->lchild = node;
+    if (NULL == pre)
+        *root = newNode;
+    else if (val < pre->value)
+        pre->lchild = newNode;
     else
-        bp->rchild = node;
+        pre->rchild = newNode;
+
+    //下面为早先实现的一个版本，可以实现，但代码不够简介
+    //BTreeNode *node = new BTreeNode;
+    //node->value = val;
+    //node->lchild = node->rchild = NULL;
+    //if (*root == NULL)
+    //{
+    //    *root = node;
+    //    return;
+    //}
+
+    //BTreeNode *bp = *root;
+    //while (bp->value > val && bp->lchild != NULL
+    //        || bp->value < val && bp->rchild != NULL) {
+    //    if (bp->value > val)
+    //        bp = bp->lchild;
+    //    else
+    //        bp = bp->rchild;
+    //}
+
+    //if (bp->value > val) 
+    //    bp->lchild = node;
+    //else
+    //    bp->rchild = node;
 
 }
     
