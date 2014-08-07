@@ -36,12 +36,32 @@ int partition(int *arr, int start, int end)
     return i + 1;
 }
 
+int partition2(int *arr, int start, int end)
+{
+    int pivot = arr[start];
+    int low, high;
+    low = start;
+    high = end;
+    while(low < high)
+    {
+        while(low < high && arr[high] > pivot)
+            --high;
+        arr[low] = arr[high];
+        
+        while(low < high && arr[low] < pivot)
+            ++low;
+        arr[high] = arr[low];    
+    }
+    arr[low] = pivot;
+    return low;
+}
+
 //注意调用quick_sort_core的实参+1/-1，遗漏可能导致死循环
 void quick_sort_core(int *arr, int start, int end)
 {
     if (start < end)
     {
-        int pivot_num = partition(arr, start, end);
+        int pivot_num = partition2(arr, start, end);
         quick_sort_core(arr, start, pivot_num - 1);
         quick_sort_core(arr, pivot_num + 1, end);
     }
