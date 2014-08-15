@@ -1,4 +1,4 @@
-//二叉树及其常用操作
+//二叉树遍历
 //Thu Jul 17 06:40:24 PDT 2014
 #include <iostream>
 #include <assert.h>
