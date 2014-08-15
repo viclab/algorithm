@@ -365,18 +365,53 @@ void TraversalByLevel(BTree root)
 //求二叉树第K层节点个数
 int GetNodeNumKthLevel(BTree root, int k)
 {
-    assert(root != NULL && k > 0);
-    <待补充>
-
-    //采用类似层次遍历的方法，
+    if (root == NULL)
+        return 0;
+    if (k == 1)
+        return 1;
+    return GetNodeNumKthLevel(root->lchild, k - 1) 
+        + GetNodeNumKthLevel(root->rchild, k - 1);
 }
     
 
 //求二叉树中两个节点的最大距离
-int GetMaxDistance(BTree root);
+int GetMaxDistance(BTree root)
+{
+    if (root == NULL)
+        return 0;
+    int maxLeft = 
+}
 
 //判断一颗二叉树是否为完全二叉树
-bool IsCompleteTree(BTree root);
+bool IsCompleteTree(BTree root)
+{
+    //按照层次遍历，当遇到一个节点的左子树为空时，则该节点右子树必须为空。
+    //且后面遍历的节点必须都为叶节点
+    assert(root != NULL);
+    queue<BTreeNode*> que;
+    que.push(root);
+    bool leaf = false;
+    while (!que.empty())
+    {
+        BTreeNode* node = que.front();
+        que.pop();
+        if(leaf && (node->lchild != NULL || node->rchild != NULL))  //若应是叶节点却不是
+            return false;
+        if (node->lchild == NULL && node->rchild != NULL)           //若左孩子为NULL，右却不为NULL
+            return false;
+        if (node->rchild == NULL)
+            leaf = true;
+
+        if (root->lchild != NULL)
+            que.push(root->lchild);
+        if (root->rchild != NULL)
+            que.push(root->rchild);
+    }
+}
+        
+            
+        
+    
 
 //求一个二叉树中两个节点最低公共祖先节点
 BTreeNode* GetLCANode(BTree root);
