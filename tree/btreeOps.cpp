@@ -3,6 +3,8 @@
 #include <iostream>
 #include <assert.h>
 #include <stack>
+#include <queue>
+#include <vector>
 using namespace std;
 
 typedef struct BTreeNode {
@@ -27,7 +29,9 @@ void InOrderTraversal(BTree root);
 void PostOrderTraversal(BTree root);
 
 //函数：重建二叉树，依据前序遍历结果和中序遍历结果
-void BuildBTreeWithInorderPreOrder(int pre[], int in[], int n);
+BTreeNode* BuildBTreeWithInorderPreOrder(int pre[], int in[], int n);
+
+BTreeNode* Construct(int *preStart, int *preEnd, int *inStart, int *inEnd);
 
 //函数：判断二叉树的后序遍历是否合法
 bool IsPostOrderValid(int post[], int n);
@@ -35,8 +39,12 @@ bool IsPostOrderValid(int post[], int n);
 //函数：二叉树中和为某值的路径
 void FindPathWithSum(BTree root, int expectedSum);
 
+void FindPathCore(BTree root, vector<BTreeNode*> &path, int currentSum, int expectedSum);
+
 //函数：将二叉树转化成双向链表
 BTreeNode* ConvertNode(BTree root);
+
+void ConvertNodeCore(BTreeNode* curNode, BTreeNode* &preNode);
 
 //函数：求二叉树深度
 int TreeDepth(BTree root);
@@ -44,8 +52,11 @@ int TreeDepth(BTree root);
 //函数：判断二叉树是否平衡二叉树
 bool IsAVLTree(BTree root);
 
+//函数：层次遍历二叉树
+void TraversalByLevel(BTree root);
+
 //求二叉树第K层节点个数
-int GetNodeNumKthLevel(BTree root);
+int GetNodeNumKthLevel(BTree root, int k);
 
 //求二叉树中两个节点的最大距离
 int GetMaxDistance(BTree root);
@@ -54,37 +65,74 @@ int GetMaxDistance(BTree root);
 bool IsCompleteTree(BTree root);
 
 //求一个二叉树中两个节点最低公共祖先节点
-BTreeNode* GetLCANode(BTree root);
+BTreeNode* GetLCANode(BTree root, BTreeNode* u, BTreeNode *v);
+
+bool IsNodeExist(BTree root, BTreeNode* node);
 
 int main()
 {
-    int a[] = {7, 2, 8, 3, 6, 4, 5, 1};
-    int n = sizeof(a) / sizeof(a[0]);
-    BTree bt = CreateBinaryTree(a, n);
+    //int a[] = {7, 2, 8, 3, 6, 4, 5, 1};
+    //int n = sizeof(a) / sizeof(a[0]);
+    //BTree bt = CreateBinaryTree(a, n);
 
-    cout << "前序遍历：";
+    //cout << "前序遍历：";
+    //PreOrderTraversal(bt);
+    //cout << endl;
+
+    //cout << "中序遍历：";
+    //InOrderTraversal(bt);
+    //cout << endl;
+
+    //cout << "后序遍历：";
+    //PostOrderTraversal(bt);
+    //cout << endl;
+
+    //cout << "层次遍历：";
+    //TraversalByLevel(bt);
+    //cout << endl;
+    
+    int preOrder[] = { 7, 2, 1, 3, 6, 4, 5, 8 };
+    int inOrder[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    int n = sizeof(preOrder) / sizeof(int);
+    BTree bt = BuildBTreeWithInorderPreOrder(preOrder, inOrder, n);
+    cout << "前序遍历：" ;
     PreOrderTraversal(bt);
     cout << endl;
-
-    cout << "中序遍历：";
+    cout << "中序遍历：" ;
     InOrderTraversal(bt);
     cout << endl;
-
-    cout << "后序遍历：";
+    cout << "后序遍历：" ;
     PostOrderTraversal(bt);
     cout << endl;
 
-    cout << "非递归前序：";
-    PreOrderNonrecursive(bt);
-    cout << endl;
+    int postOrder[] = { 1, 5, 4, 6, 3, 2, 8, 7};
+    cout << "后续序列合法：" << IsPostOrderValid(postOrder, n)
+        << "\t树深度：" << TreeDepth(bt) << endl;
 
-    cout << "非递归中序：";
-    InOrderNonrecursive(bt);
-    cout << endl;
+    FindPathWithSum(bt, 27);
 
-    cout << "非递归后序：";
-    PostOrderNonrecursive(bt);
-    cout << endl;
+    cout << "AVL：" << IsAVLTree(bt) 
+        << "\t第3层节点数：" << GetNodeNumKthLevel(bt, 3) << endl;
+
+    cout << "是否完全二叉树：" << IsCompleteTree(bt) << endl;
+    cout << "两个节点最大距离：" << GetMaxDistance(bt) << endl;
+    
+    BTreeNode* u = bt->lchild->lchild;
+    BTreeNode* v = bt->lchild->rchild->rchild->lchild;
+    cout << IsNodeExist(bt, u) << "|" << IsNodeExist(bt, v) << "|" << IsNodeExist(bt, NULL) << endl ;
+    cout << u->value << " " << v->value << endl;
+    cout << (GetLCANode(bt, u, v))->value << endl;      //有BUG，待完善
+
+    //BTreeNode* head = ConvertNode(bt);
+    //BTreeNode* pos = head;
+    //cout << "转换成的链表遍历：";
+    //while (head != NULL)
+    //{
+    //    cout << head->value << "\t";
+    //    pos = head->rchild;
+    //}
+    //cout << endl;
+    
     return 0;
 }
 
@@ -94,8 +142,8 @@ BTree CreateBinaryTree(int *arr, int n)
     assert(arr != NULL && n > 0);
     BTree root = NULL;
     for (int i=0; i<n; ++i)
-        //InsertBinaryTree(&root, *(arr+i));
-        InsertBTreeRecursion(root, *(arr+i));
+        InsertBinaryTree(&root, *(arr+i));
+        //InsertBTreeRecursion(root, *(arr+i));
     return root;
 }
 
@@ -273,7 +321,7 @@ void FindPathCore(BTree root, vector<BTreeNode*> &path,
     {
         vector<BTreeNode*>::iterator ite = path.begin();
         for (;ite != path.end(); ++ite)
-            cout << ite->value << "\t";
+            cout << (*ite)->value << "\t";
         cout << endl;
     }
 
@@ -285,7 +333,7 @@ void FindPathCore(BTree root, vector<BTreeNode*> &path,
 
     //该条路径不合要求，路径上删除该节点
     //currentSum -= root->value;    //不需要，因为非引用传递
-    path.pop_back(root);
+    path.pop_back();
 }
             
 
@@ -297,7 +345,7 @@ BTreeNode* ConvertNode(BTree root)
     ConvertNodeCore(root, lastNode);
     BTreeNode* head = lastNode;
     while(head != NULL && head->lchild != NULL)
-        head = lchild;
+        head = head->lchild;
     return head;
 }
 
@@ -377,10 +425,9 @@ int GetNodeNumKthLevel(BTree root, int k)
 //求二叉树中两个节点的最大距离
 int GetMaxDistance(BTree root)
 {
-    if (root == NULL)
-        return 0;
-    int maxLeft = 
+    return TreeDepth(root->lchild) + TreeDepth(root->rchild);
 }
+
 
 //判断一颗二叉树是否为完全二叉树
 bool IsCompleteTree(BTree root)
@@ -409,10 +456,43 @@ bool IsCompleteTree(BTree root)
     }
 }
         
-            
-        
-    
 
 //求一个二叉树中两个节点最低公共祖先节点
-BTreeNode* GetLCANode(BTree root);
+BTreeNode* GetLCANode(BTree root, BTreeNode* u, BTreeNode *v)
+{
+    if (root == NULL)
+        return NULL;
+    //设当前节点为root
+    //若当前节点左子树（或右子树）中能同时找到节点u和v，则将当前节点设置为root的左孩子（或右孩子）
+    //若节点u,v一个在当前节点的左子树，一个在当前节点的右子树，则当前节点为u，v最低公共祖先节点
 
+    BTreeNode *currentNode = root;
+    while (currentNode != NULL)
+    {
+        if (IsNodeExist(root->lchild, u) && IsNodeExist(root->rchild, v)
+                || IsNodeExist(root->lchild, v) && IsNodeExist(root->rchild, u))
+            return currentNode;
+        if (IsNodeExist(root->lchild, u) && IsNodeExist(root->lchild, v))
+            currentNode = currentNode->lchild;
+        if (IsNodeExist(root->rchild, u) && IsNodeExist(root->rchild, v))
+            currentNode = currentNode->rchild;
+    }
+
+    return NULL;
+}
+
+bool IsNodeExist(BTree root, BTreeNode* node)
+{
+    if (root != NULL)
+    {
+        if (root == node)
+            return true;
+        
+        return IsNodeExist(root->lchild, node)
+            || IsNodeExist(root->rchild, node);
+
+        return false;
+    }
+
+    return false;
+}
